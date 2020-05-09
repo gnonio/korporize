@@ -1,3 +1,9 @@
+/*
+   korporize for korpora (Apache 2.0) by https://github.com/gnonio
+   Copyright 2020 Pedro SOARES
+   
+*/
+
 browser.contextMenus.create({
   id: "extractTextLoadedImage",
   title: "Extract Text from Image",
@@ -23,7 +29,7 @@ browser.contextMenus.onClicked.addListener( async function(info, tab) {
       CONTENT PAGE COMMUNICATION
     */
     case "extractTextLoadedImage":
-      await browser.tabs.sendMessage(tab.id, {
+      browser.tabs.sendMessage(tab.id, {
             method: "CP_extractTextLoadedImage", data: info.srcUrl})
       break
     /*
@@ -31,7 +37,7 @@ browser.contextMenus.onClicked.addListener( async function(info, tab) {
     */
     case "extractTextLink":
       console.log( "extractTextLink", info, tab )
-      /*await browser.tabs.sendMessage(tab.id, {
+      /*browser.tabs.sendMessage(tab.id, {
             method: "CP_extractTextLink", data: info.srcUrl})*/
       break
     case "extractTextPage":

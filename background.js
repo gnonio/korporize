@@ -1,3 +1,21 @@
+/*
+   korporize for korpora (Apache 2.0) by https://github.com/gnonio
+   Copyright 2020 Pedro SOARES
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+   
+*/
+
 async function notCPInject( tabID ) {
   try {
     await browser.tabs.sendMessage(tabID, {})
@@ -10,8 +28,8 @@ async function notCPInject( tabID ) {
 
 async function injectCPScript(tabId){
   let urls = [
-    browser.runtime.getURL("js/content-inject.js"),
-    browser.runtime.getURL("js/content-inject-ui.js")
+    browser.runtime.getURL("js/content.js"),
+    browser.runtime.getURL("js/content-ui.js")
   ]
   let scripts = []
   
@@ -21,7 +39,7 @@ async function injectCPScript(tabId){
   }
   
   let script = scripts.join("\n\n")
-
+  var insertingCSS = browser.tabs.insertCSS( tabId, {file: "js/content.css"} )
   return await browser.tabs.executeScript( tabId, {code: script} )
 }
 
@@ -34,12 +52,20 @@ function handleMessage(message, sender, sendResponse) {
       //console.log("BG_extractTextLoadedImage", message, sender, message.data.language)
       OCRLoadedImage( message.data.image, sender.tab.id, message.data.language )
       break
+    case "BG_korporizeOptions":
+      browser.runtime.openOptionsPage()
+      break
   }
 }
 browser.runtime.onMessage.addListener( handleMessage )
 
+function tesseractLogger(tabId, msg) {
+  browser.tabs.sendMessage(tabId, {method: "CP_tesseractLogger", data: msg} )
+}
+
 function OCRLoadedImage(imageData, tabId, language) {
-  cron( extractTextImage, [imageData, language, "fast", "SINGLE_BLOCK"] )
+  browser.tabs.sendMessage(tabId, {method: "CP_tesseractLanguage", data: language} )
+  cron( extractTextImage, [imageData, language, "fast", "SINGLE_BLOCK", tesseractLogger, tabId] )
     .then( (resolve, reject) => {
       console.log( resolve.data )
       browser.tabs.sendMessage( tabId, {
@@ -48,17 +74,16 @@ function OCRLoadedImage(imageData, tabId, language) {
     } )
 }
 
-async function extractTextImage( imageUrl, language, quality, psm ) {
+async function extractTextImage( imageUrl, language, quality, psm, logger, tabId ) {
   //https://github.com/naptha/tesseract.js/blob/master/docs/api.md
   const createWorker = Tesseract.createWorker
   
   //https://github.com/naptha/tessdata
   let lang = language ? language : 'eng'
   // 'lib/lang-data/' | 'https://tessdata.projectnaptha.com/'
-  let datapath = 'https://tessdata.projectnaptha.com/'
   //let datapath = 'lib/lang-data/'
+  let datapath = 'https://tessdata.projectnaptha.com/'
   // 4.0.0 | 4.0.0_best | 4.0.0_fast
-  //let traindata = "4.0.0_fast"
   let traindata = quality ? "4.0.0" + "_" + quality : "4.0.0_fast"
   // write | readOnly | refresh | none
   let cachedata = 'write'
@@ -75,7 +100,8 @@ async function extractTextImage( imageUrl, language, quality, psm ) {
     cachePath: traindata,
     cacheMethod: cachedata,
     workerBlobURL: false,
-    logger: m => console.log(m), // Add logger here
+    logger: m => logger(tabId, m), // Add logger here
+    //logger: m => console.log(m), // Add logger here
     //errorHandler: e => console.error(e)
   }
   let parameters = {

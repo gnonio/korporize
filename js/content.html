@@ -1,0 +1,46 @@
+   <!-- korporize for korpora (Apache 2.0) by https://github.com/gnonio -->
+   <!-- Copyright 2020 Pedro SOARES -->
+
+<div id="korporize">
+
+  <div class="header table" title="Drag to Move">
+    <div class="grabber cell w70 left">
+      <img id="k_logo" class="h32" src="../img/korporize.svg"/>
+    </div>
+    <div class="cell w30 right">
+      <!-- <button class="button" title="korporize Menu"> -->
+        <!-- <img id="korporize_menu" src="../img/Menu.svg"/> -->
+      <!-- </button> -->
+      <button id="k_options" class="button h28" title="Options">
+        <img class="h12" src="../img/options.svg"/>
+      </button>
+    </div>
+  </div>
+  
+  <div style="background:#00c0e0ff; border-radius:0px 0px 8px 8px; text-align:center; padding:2px;">
+
+    <div id="korporize_options_panel" style="display:block; padding:2px 8px; text-align:left;">
+      
+      <div class="table" style="width: 100%; box-sizing: border-box; padding: 2px 8px;">
+        <div id="korporize_detLang" style="font-style:oblique; display:table-cell; width:80%;"></div>
+        <div id="korporize_refresh" title="Copy to Clipboard" style="display:table-cell; width:10%; text-align:right">
+          <img src="../img/Refresh.svg"/>
+        </div>
+        <div id="korporize_copy" title="Copy to Clipboard" style="display:table-cell; width:10%; text-align:right">
+          <img src="../img/Copy.svg"/>
+        </div>
+      </div>
+      
+      <div style="padding:8px;">
+        <div id="korporize_OCR" style="width:100%; background:#ffffff; text-align:left; min-height: 60px; padding: 4px;" contenteditable="true">...</div>
+      </div>
+
+    </div>
+    
+    <div id="korporize_drawer" class="drawer" style="">
+      <div style="position:relative; top:-6px; font-size: 16px;" title="Options">═</div>
+    </div>
+  
+  </div>
+
+</div>
