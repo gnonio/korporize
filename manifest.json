@@ -1,0 +1,43 @@
+{
+  "manifest_version": 2,
+  "name": "korporize",
+  "version": "0.9",
+  "description": "OCR - Object Character Recognition for any image you browse upon",
+  "icons": {
+    "32": "img/k.svg"
+  },
+  "homepage_url": "https://github.com/gnonio/korporize",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "korporize@gnonio.com"
+    }
+  },
+  "options_ui": {
+    "page": "./js/options.html"
+  },
+  "permissions": [
+    "contextMenus",
+    "tabs",
+    "activeTab",
+    "<all_urls>",
+    "storage",
+    "unlimitedStorage",
+    "clipboardWrite"
+  ],
+  "background": {
+    "scripts": [
+      "background.js",
+      "background-ui.js",
+      "lib/tesseract.min.js",
+      "js/helpers.js"
+    ]
+  },
+  "web_accessible_resources": [
+    "img/*.svg",
+    "js/*.js",
+    "lib/*.js",
+    "lib/lang-data/4.0.0/*.traineddata.gz",
+    "lib/lang-data/4.0.0_best/*.traineddata.gz",
+    "lib/lang-data/4.0.0_fast/*.traineddata.gz"
+  ]
+}
