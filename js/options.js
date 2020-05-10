@@ -16,60 +16,119 @@ const tesseract_langs = {
   le: ["afr","amh","ara","asm","aze","aze_cyrl","bel","ben","bod","bos","bul","cat","ceb","ces","chi_sim","chi_tra","chr","cym","dan","deu","dzo","ell","eng","enm","epo","est","eus","fas","fin","fra","frk","frm","gle","glg","grc","guj","hat","heb","hin","hrv","hun","iku","ind","isl","ita","ita_old","jav","jpn","kan","kat","kat_old","kaz","khm","kir","kor","kur","lao","lat","lav","lit","mal","mar","mkd","mlt","msa","mya","nep","nld","nor","ori","pan","pol","por","pus","ron","rus","san","sin","slk","slv","spa","spa_old","sqi","srp","srp_latn","swa","swe","syr","tam","tel","tgk","tgl","tha","tir","tur","uig","ukr","urd","uzb","uzb_cyrl","vie","yid"]
 }
 
-function saveSettings(e) {
-  e.preventDefault()
-  console.log(e, defaultLanguage)
-  /*browser.storage.sync.set({
-    defaultLanguage: supportedLanguages.options[supportedLanguages.selectedIndex].value
-  });*/
-}
-
-let defaultLanguage = "eng"
-let supportedLanguages = document.getElementById("supportedLanguages")
-
-function restoreOptions() {
-  function populate_langs() {
-    for (let i = 0; i < tesseract_langs.name.length; i++) {
-      let lang = document.createElement("option")
-      lang.text = "(" + tesseract_langs.le[i] + ") " + tesseract_langs.name[i]
-      lang.value = tesseract_langs.le[i]
-      supportedLanguages.add(lang)
+/*function getTableData() {
+  let table = document.getElementsByTagName("table")[1]
+  let iso = [];
+  let le2 = [];
+  let le3 = [];
+  for (i = 0; i < table.rows.length; i++) {
+    let cells = table.rows.item(i).cells
+    if ( tesseract_langs.le.indexOf(cells.item(5).innerText) >= 0 ) {
+      iso.push( cells.item(2).innerText ) // ISO Name    "English"
+      le2.push( cells.item(4).innerText ) // 639-1       "en"
+      le3.push( cells.item(5).innerText ) // 639-2/T     "eng"
     }
-    supportedLanguages.selectedIndex = tesseract_langs.le.indexOf(defaultLanguage)
   }
+  console.log( JSON.stringify(iso) )
+  console.log( JSON.stringify(le2) )
+  console.log( JSON.stringify(le3) )
+}
+getTableData()*/
+
+//var clearing = browser.storage.sync.clear()
+//var clearing = browser.storage.local.clear()
+
+let k_defaults = {}
+
+async function restoreOptions() {
+  let defaults = await browser.storage.local.get("k_defaults")
+  loadOptions( defaults )
   populate_langs()
-  
-  function setCurrentChoice(result) {
-    defaultLanguage = tesseract_langs.le.indexOf(result)
-    supportedLanguages.selectedIndex = defaultLanguage || "eng"
-    //document.querySelector("#color").value = result.color || "blue"
-  }
-  
-  function onError(error) {
-    console.log(`Error: ${error}`)
-  }
-
-  let getting = browser.storage.sync.get("defaultLanguage")
-  getting.then(setCurrentChoice, onError)
-
-  /*function setCurrentChoice(result) {
-    document.querySelector("#color").value = result.color || "blue"
-  }
-
-  function onError(error) {
-    console.log(`Error: ${error}`)
-  }
-
-  let getting = browser.storage.sync.get("color")
-  getting.then(setCurrentChoice, onError)*/
 }
 
+async function loadOptions(result) {
+  if ( result.k_defaults ) {      
+    k_defaults = result.k_defaults
+    console.log("Restoring defaults", k_defaults)
+  } else {
+    let options = {
+      k_defaults: {
+        language:   "eng",
+        autodetect: true,
+        quality:    "4.0.0_fast",
+        autocopy:   true
+      }
+    }
+    await browser.storage.local.set(options)
+    k_defaults = options.k_defaults
+    console.warn("Setting defaults", k_defaults)
+  }
+  languages.selectedIndex = tesseract_langs.le.indexOf(k_defaults.language)
+  autodetect.checked = k_defaults.autodetect
+  
+  let quality = document.querySelectorAll(".quality")
+  for ( input in quality ) {
+    if ( k_defaults.quality == quality[input].value ) {
+      quality[input].checked = true
+    } else {
+      quality[input].checked = false
+    }
+  }
+  
+  autocopy.checked = k_defaults.autocopy
+}
+
+function populate_langs() {
+  for (let i = 0; i < tesseract_langs.name.length; i++) {
+    let lang = document.createElement("option")
+    lang.text = tesseract_langs.name[i] + " (" + tesseract_langs.le[i] + ")"
+    lang.value = tesseract_langs.le[i]
+    languages.add(lang)
+  }
+  languages.selectedIndex = tesseract_langs.le.indexOf(k_defaults.language)  
+}
+
+function languageChange() {
+  k_defaults.language = this.options[this.selectedIndex].value
+}
+
+function autodetectChange() {
+  k_defaults.autodetect = this.checked
+}
+
+function qualityChange() {
+  k_defaults.quality = this.value
+}
+
+function autocopyChange() {
+  k_defaults.autocopy = this.checked
+}
+
+function saveOptions(e) {
+  e.preventDefault()
+  browser.storage.local.set( {k_defaults: k_defaults} )
+  console.log("Saving defaults", k_defaults)
+}
+  
 document.addEventListener("DOMContentLoaded", restoreOptions)
-document.querySelector("form").addEventListener("submit", saveSettings)
 
-function languageSwitch() {
-  defaultLanguage = supportedLanguages.options[supportedLanguages.selectedIndex].value;
-  console.log( defaultLanguage )
-}
+let languages = document.getElementById("languages")
+languages.addEventListener("input", languageChange)
 
-supportedLanguages.addEventListener("input", languageSwitch)
+let autodetect = document.getElementById("autodetect")
+autodetect.addEventListener("input", autodetectChange)
+
+let fast = document.getElementById("fast")
+fast.addEventListener("input", qualityChange)
+
+let normal = document.getElementById("normal")
+normal.addEventListener("input", qualityChange)
+
+let best = document.getElementById("best")
+best.addEventListener("input", qualityChange)
+
+let autocopy = document.getElementById("autocopy")
+autocopy.addEventListener("input", autocopyChange)
+
+let k_save = document.getElementById("k_save")
+k_save.addEventListener("click", saveOptions)

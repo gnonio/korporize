@@ -49,8 +49,7 @@ function handleMessage(message, sender, sendResponse) {
       CONTENT PAGE COMMUNICATION
     */
     case "BG_extractTextLoadedImage":
-      //console.log("BG_extractTextLoadedImage", message, sender, message.data.language)
-      OCRLoadedImage( message.data.image, sender.tab.id, message.data.language )
+      OCRLoadedImage( message.data.image, sender.tab.id, message.data.language, message.data.quality )
       break
     case "BG_kOptions":
       browser.runtime.openOptionsPage()
@@ -63,15 +62,22 @@ function tesseractLogger(tabId, msg) {
   browser.tabs.sendMessage(tabId, {method: "CP_tesseractLogger", data: msg} )
 }
 
-function OCRLoadedImage(imageData, tabId, language) {
+function OCRLoadedImage(imageData, tabId, language, quality) {
   browser.tabs.sendMessage(tabId, {method: "CP_tesseractLanguage", data: language} )
-  cron( extractTextImage, [imageData, language, "fast", "SINGLE_BLOCK", tesseractLogger, tabId] )
-    .then( (resolve, reject) => {
-      console.log( resolve.data )
-      browser.tabs.sendMessage( tabId, {
-        method: "CP_showOCRResult", data: resolve.data } )
-      copyToClipboard( resolve.data.text )
-    } )
+  if ( imageData && tabId && language ) {
+    cron( extractTextImage, [imageData, language, quality, "SINGLE_BLOCK", tesseractLogger, tabId] )
+      .then( (resolve, reject) => {        
+        if ( resolve ) {
+          browser.tabs.sendMessage( tabId, {
+            method: "CP_showOCRResult", data: resolve.data } )
+        } else {
+          browser.tabs.sendMessage( tabId, {
+            method: "CP_showOCRResult", data: reject.data } )
+        }
+      } )
+  } else {
+    console.warn("OCRLoadedImage", imageData, tabId, language)
+  }
 }
 
 async function extractTextImage( imageUrl, language, quality, psm, logger, tabId ) {
@@ -84,7 +90,7 @@ async function extractTextImage( imageUrl, language, quality, psm, logger, tabId
   //let datapath = 'lib/lang-data/'
   let datapath = 'https://tessdata.projectnaptha.com/'
   // 4.0.0 | 4.0.0_best | 4.0.0_fast
-  let traindata = quality ? "4.0.0" + "_" + quality : "4.0.0_fast"
+  let traindata = quality ? quality : "4.0.0_fast"
   // write | readOnly | refresh | none
   let cachedata = 'write'
   //AUTO | AUTO_OSD | SINGLE_BLOCK
@@ -101,7 +107,7 @@ async function extractTextImage( imageUrl, language, quality, psm, logger, tabId
     cacheMethod: cachedata,
     workerBlobURL: false,
     logger: m => logger(tabId, m), // Add logger here
-    //errorHandler: e => console.error(e)
+    errorHandler: e => logger(tabId, e)
   }
   let parameters = {
     tessedit_pageseg_mode: PSM,
@@ -111,13 +117,19 @@ async function extractTextImage( imageUrl, language, quality, psm, logger, tabId
   }
   let worker = createWorker(options)
   
-  await worker.load()
-  await worker.loadLanguage(lang)
-  await worker.initialize(lang)
-  await worker.setParameters(parameters)
-  //let { data: { text } } = await worker.recognize(imageUrl)
-  let data = await worker.recognize(imageUrl) // , hocr, tsv, box, unlv
-  data.data.language = language
-  await worker.terminate()
+  let data
+  try {  
+    await worker.load()
+    await worker.loadLanguage(lang)
+    await worker.initialize(lang)
+    await worker.setParameters(parameters)
+    //let { data: { text } } = await worker.recognize(imageUrl)
+    data = await worker.recognize(imageUrl) // , hocr, tsv, box, unlv
+    data.data.language = language
+    await worker.terminate()
+  } catch (e) {
+    console.warn(e)
+    data = {data: { language: language, text: "Error", confidence: 0 }}
+  }
   return data
 }
