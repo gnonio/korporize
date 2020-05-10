@@ -1,6 +1,6 @@
-# Corpus-OCR
+# korporize
 
-## Corpus - Object Character Recognition
+## korpora - OCR - Object Character Recognition
 
 Offline text recognition from any image. This web extension will enable context menu access to extract text from any image while browsing. Builds upon Tesseract.js (link)
 

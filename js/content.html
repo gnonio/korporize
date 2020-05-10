@@ -1,0 +1,57 @@
+   <!-- korporize for korpora (Apache 2.0) by https://github.com/gnonio -->
+   <!-- Copyright 2020 Pedro SOARES -->
+
+<div id="korporize">
+
+  <div class="kheader table" title="Press and Drag">
+    <div class="kgrabber cell w70 left">
+      <img id="k_logo" class="h32" src="../img/korporize.svg"/>
+    </div>
+    <div class="cell w30 right">
+      <!-- <button class="button" title="korporize Menu"> -->
+        <!-- <img id="korporize_menu" src="../img/Menu.svg"/> -->
+      <!-- </button> -->
+      <button id="k_options" class="button h28" title="Options">
+        <img class="h12" src="../img/options.svg"/>
+      </button>
+    </div>
+  </div>
+  
+  <div class="kpanel" style="">
+
+    <div id="k_OCRPanel" style="padding:2px 8px;">
+      
+      <div class="table" style="padding: 2px 8px;">
+        <!-- <div class="cell w10 right"> -->
+          <!-- <button id="k_refresh" class="button h28" title="Refresh" style=""> -->
+            <!-- <img class="h12" src="../img/refresh.svg"/> -->
+          <!-- </button> -->
+        <!-- </div> -->
+        <div class="cell w30 left">
+          <div id="k_language" title="Detected Language" style="font-style:oblique;"></div>
+        </div>
+        <div class="cell w60 left bgDark" style="position: relative; border-radius: 4px;">
+          <div id="k_progress" class="kprogress" title="Progress">0%</div>
+          <div id="k_status" class="kstatus" title="Status" style="font-style:oblique;">kstatus</div>
+          <!-- <progress id="k_progress" value="0" max="1"> 0% </progress> -->
+        </div>
+        <div class="cell w10 right">
+          <button id="k_copy" class="button h28"  title="Copy to Clipboard" style="">
+            <img class="h12" src="../img/copy.svg"/>
+          </button>
+        </div>
+      </div>
+      
+      <div class="table" style="padding:8px;">
+        <div id="k_OCRText" style="" contenteditable="true">...</div>
+      </div>
+
+    </div>
+    
+    <div id="k_drawer" class="kdrawer" title="Hide" style="">
+      <div style="position:relative; top:-6px; font-size: 16px;" >═</div>
+    </div>
+  
+  </div>
+
+</div>
