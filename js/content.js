@@ -90,6 +90,9 @@ function getImageDataUrl(imgSrc) {
 
 async function handleMessage(message, sender, sendResponse) {
   //console.log( message, sender, sendResponse );
+  let k_progress = document.getElementById("k_progress")
+  let k_status = document.getElementById("k_status")
+  let k_OCRText = document.getElementById("k_OCRText")
   let image, data
   switch (message.method) {
     /*
@@ -110,17 +113,20 @@ async function handleMessage(message, sender, sendResponse) {
       } else { console.warn("Image source URL not found in page") }
       break
     case "CP_tesseractLanguage":
-      //console.log( message.data )
       let language = ISO_langs.name[ISO_langs.le3.indexOf( message.data )]
-      document.getElementById("korporize_detLang").innerText = language
+      document.getElementById("k_language").innerText = language
       break
     case "CP_tesseractLogger":
+      k_status.innerText = message.data.status
+      let progress = Math.round(message.data.progress*100)
+      k_progress.style.width = progress + "%"
+      k_progress.innerText = progress + "%"
       console.log( message.data )
       break
     case "CP_showOCRResult":
-      console.log( "CP_showOCRResult", message )
-      document.getElementById("korporize_OCR").innerHTML = message.data.text      
-      //showPanel()
+      //console.log( "CP_showOCRResult", message )
+      k_OCRText.innerHTML = message.data.text
+      k_status.innerText = "Confidence: " + message.data.confidence + "%"
       break
   }
 }

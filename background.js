@@ -52,7 +52,7 @@ function handleMessage(message, sender, sendResponse) {
       //console.log("BG_extractTextLoadedImage", message, sender, message.data.language)
       OCRLoadedImage( message.data.image, sender.tab.id, message.data.language )
       break
-    case "BG_korporizeOptions":
+    case "BG_kOptions":
       browser.runtime.openOptionsPage()
       break
   }
@@ -95,13 +95,12 @@ async function extractTextImage( imageUrl, language, quality, psm, logger, tabId
   
   let options = {
     workerPath: 'lib/worker.min.js',
-    corePath: 'lib/tesseract-core.wasm.js', // tesseract-core.asm.js SLOW
+    corePath: 'lib/tesseract-core.wasm.js', // .asm.js = SLOW
     langPath: datapath + traindata,
     cachePath: traindata,
     cacheMethod: cachedata,
     workerBlobURL: false,
     logger: m => logger(tabId, m), // Add logger here
-    //logger: m => console.log(m), // Add logger here
     //errorHandler: e => console.error(e)
   }
   let parameters = {

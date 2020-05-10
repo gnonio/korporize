@@ -3,8 +3,8 @@
 
 <div id="korporize">
 
-  <div class="header table" title="Drag to Move">
-    <div class="grabber cell w70 left">
+  <div class="kheader table" title="Press and Drag">
+    <div class="kgrabber cell w70 left">
       <img id="k_logo" class="h32" src="../img/korporize.svg"/>
     </div>
     <div class="cell w30 right">
@@ -17,28 +17,39 @@
     </div>
   </div>
   
-  <div style="background:#00c0e0ff; border-radius:0px 0px 8px 8px; text-align:center; padding:2px;">
+  <div class="kpanel" style="">
 
-    <div id="korporize_options_panel" style="display:block; padding:2px 8px; text-align:left;">
+    <div id="k_OCRPanel" style="padding:2px 8px;">
       
-      <div class="table" style="width: 100%; box-sizing: border-box; padding: 2px 8px;">
-        <div id="korporize_detLang" style="font-style:oblique; display:table-cell; width:80%;"></div>
-        <div id="korporize_refresh" title="Copy to Clipboard" style="display:table-cell; width:10%; text-align:right">
-          <img src="../img/Refresh.svg"/>
+      <div class="table" style="padding: 2px 8px;">
+        <!-- <div class="cell w10 right"> -->
+          <!-- <button id="k_refresh" class="button h28" title="Refresh" style=""> -->
+            <!-- <img class="h12" src="../img/refresh.svg"/> -->
+          <!-- </button> -->
+        <!-- </div> -->
+        <div class="cell w30 left">
+          <div id="k_language" title="Detected Language" style="font-style:oblique;"></div>
         </div>
-        <div id="korporize_copy" title="Copy to Clipboard" style="display:table-cell; width:10%; text-align:right">
-          <img src="../img/Copy.svg"/>
+        <div class="cell w60 left bgDark" style="position: relative; border-radius: 4px;">
+          <div id="k_progress" class="kprogress" title="Progress">0%</div>
+          <div id="k_status" class="kstatus" title="Status" style="font-style:oblique;">kstatus</div>
+          <!-- <progress id="k_progress" value="0" max="1"> 0% </progress> -->
+        </div>
+        <div class="cell w10 right">
+          <button id="k_copy" class="button h28"  title="Copy to Clipboard" style="">
+            <img class="h12" src="../img/copy.svg"/>
+          </button>
         </div>
       </div>
       
-      <div style="padding:8px;">
-        <div id="korporize_OCR" style="width:100%; background:#ffffff; text-align:left; min-height: 60px; padding: 4px;" contenteditable="true">...</div>
+      <div class="table" style="padding:8px;">
+        <div id="k_OCRText" style="" contenteditable="true">...</div>
       </div>
 
     </div>
     
-    <div id="korporize_drawer" class="drawer" style="">
-      <div style="position:relative; top:-6px; font-size: 16px;" title="Options">═</div>
+    <div id="k_drawer" class="kdrawer" title="Hide" style="">
+      <div style="position:relative; top:-6px; font-size: 16px;" >═</div>
     </div>
   
   </div>
