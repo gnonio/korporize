@@ -5,18 +5,88 @@
    <!-- Copyright 2020 Pedro SOARES -->
   <head>
     <meta charset="utf-8">
+      <style>
+.table {
+  display: table;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0px;
+}
+.row {
+  display: table-row;
+  text-align:center;
+  vertical-align: middle;
+  padding: 2px;
+}
+.cell {
+  display: table-cell;
+  padding: 2px 8px;
+  margin: 2px;
+}
+.left { text-align: left }
+.right { text-align: right }
+
+.w10 { width: 10% }
+.w20 { width: 20% }
+.w30 { width: 30% }
+.w40 { width: 40% }
+.w50 { width: 50% }
+.w60 { width: 60% }
+.w70 { width: 70% }
+.w80 { width: 80% }
+.w90 { width: 90% }
+.w100 { width: 100% }
+      </style>
   </head>
 
   <body>
-    <form>
-      <p>Select default language for recognition</p>
-      <p>
-        Language <select id="supportedLanguages" style="" title="Select Language"></select>
-      </p>
-      <!-- <label>Border color<input type="text" id="color" ></label> -->
-      <button type="submit">Save</button>
-    </form>
-
+    <div class="table">
+      <div class="row">
+        <div class="cell"><h4>Set default options:</h4></div>
+      </div>
+      <div class="row">
+        <div class="cell w30 right">
+          <select id="languages" style="" title="Select Language"></select>
+        </div>
+        <div class="cell w60 left">
+          <label for="languages">Language</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="cell w30 right">
+          <input type="checkbox" id="autodetect" name="autodetect" value="autodetect" checked="checked">
+        </div>
+        <div class="cell w60 left" >
+          <label for="autodetect">Automatic Detection</label>
+        </div>
+      </div>
+      <div class="row"> 
+        <div id="quality" class="cell w30 right">
+          <input class="quality" type="radio" id="fast" name="quality" value="4.0.0_fast" checked="checked">
+          <label for="fast">Fast</label>
+          <input class="quality" type="radio" id="normal" name="quality" value="4.0.0">
+          <label for="normal">Normal</label>
+          <input class="quality" type="radio" id="best" name="quality" value="4.0.0_best">
+          <label for="best">Best</label>
+        </div>
+        <div class="cell w60 left">
+          <label for="quality">Quality</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="cell w30 right">
+          <input type="checkbox" id="autocopy" name="autocopy" value="active" checked="checked">
+        </div>
+        <div class="cell w60 left">
+          <label for="autocopy">Automatic Copy to Clipboard</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="cell w30">
+          <button id="k_save" title="Save Settings" width="80px">Save Settings</button>
+        </div>          
+      </div>
+    </div>
     <script src="options.js"></script>
   </body>
 </html>

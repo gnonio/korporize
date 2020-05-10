@@ -21,15 +21,15 @@
 ```
 
 **Files included in korporize (folder ./lib):**
-(Tesseract.js must be built)
+(tesseract.js must be built)
 
-| Library        | Files                                                 |
-|:---------------|:------------------------------------------------------|
-| Tesseract.js   | node-modules/tesseract.js/dist/tesseract.min.js       |
-|                | node-modules/tesseract.js/dist/tesseract.min.js.map   |
-|                | node-modules/tesseract.js/dist/worker.min.js          |
-|                | node-modules/tesseract.js/dist/worker.min.js.map      |
-| Tesseract-core | node-modules/tesseract.js-core/tesseract-core.wasm.js |
+| Library           | Files                                                 |
+|:------------------|:------------------------------------------------------|
+| tesseract.js      | node-modules/tesseract.js/dist/tesseract.min.js       |
+|                   | node-modules/tesseract.js/dist/tesseract.min.js.map   |
+|                   | node-modules/tesseract.js/dist/worker.min.js          |
+|                   | node-modules/tesseract.js/dist/worker.min.js.map      |
+| tesseract.js-core | node-modules/tesseract.js-core/tesseract-core.wasm.js |
 
 [Tesseract Language Trained Data included](https://github.com/naptha/tessdata) (4.0.0)
 
@@ -42,4 +42,3 @@
 |          |            | 4.0.0_best/osd.traineddata.gz |
 |          | 4.0.0_fast | 4.0.0_fast/eng.traineddata.gz |
 |          |            | 4.0.0_fast/osd.traineddata.gz |
-
