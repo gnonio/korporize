@@ -31,7 +31,9 @@
 |                   | node-modules/tesseract.js/dist/worker.min.js.map      |
 | tesseract.js-core | node-modules/tesseract.js-core/tesseract-core.wasm.js |
 
-[Tesseract Language Trained Data included](https://github.com/naptha/tessdata) (4.0.0)
+**Files downloaded by korporize (may be included in future releases):**
+
+[Tesseract Language Trained Data](https://github.com/naptha/tessdata) (4.0.0)
 
 | Library  | Quality    | Files                         |
 |:---------|:-----------|:------------------------------|
