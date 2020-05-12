@@ -106,6 +106,9 @@
   text-align: center;
   color: rgba(0, 192, 224, 255);
   line-height: 26px;
+  /*overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ".";*/
 }
 
 .w10 { width: 10% }

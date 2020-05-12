@@ -14,32 +14,8 @@ String.prototype.toDOM = function(){
   return b
 }
 
-function copyToClipboard(text) {
-  if (!navigator.clipboard && navigator.clipboard.writeText) {
-    return navigator.clipboard.writeText(text)
-  } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
-    var textarea = document.createElement("textarea")
-    textarea.textContent = text
-    textarea.style.position = "fixed"  // Prevent scrolling to bottom of page in Microsoft Edge.
-    document.body.appendChild(textarea)
-
-    textarea.select()
-    try {
-      return document.execCommand("copy");  // Security exception may be thrown by some browsers.
-    }
-    catch (ex) {
-      console.warn("Copy to clipboard failed.", ex)
-      return false
-    }
-    finally {
-      document.body.removeChild(textarea)
-    }
-  }
-}
-
 // We may need this async because of checkLanguage()
-async function init(){
-  
+async function init(){  
   function pressAndDrag(element, grabber) {
     var X = 0, Y = 0, dX = 0, dY = 0
     if (grabber) {
@@ -76,7 +52,7 @@ async function init(){
   
   function k_copytoclipboard() {
     let OCRtext = document.getElementById("k_OCRText").innerText
-    copyToClipboard( OCRtext )
+    navigator.clipboard.writeText( OCRtext )
   }
   
   function k_OCRPanel_toggle() {

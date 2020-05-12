@@ -28,6 +28,7 @@ async function notCPInject( tabID ) {
 
 async function injectCPScript(tabId){
   let urls = [
+    browser.runtime.getURL("js/languages.js"),
     browser.runtime.getURL("js/content.js"),
     browser.runtime.getURL("js/content-ui.js")
   ]
@@ -69,10 +70,10 @@ function OCRLoadedImage(imageData, tabId, language, quality) {
       .then( (resolve, reject) => {        
         if ( resolve ) {
           browser.tabs.sendMessage( tabId, {
-            method: "CP_showOCRResult", data: resolve.data } )
+            method: "CP_showOCRResult", data: resolve } )
         } else {
           browser.tabs.sendMessage( tabId, {
-            method: "CP_showOCRResult", data: reject.data } )
+            method: "CP_showOCRResult", data: reject } )
         }
       } )
   } else {

@@ -1,6 +1,6 @@
 [![korporize](./img/korporize.svg)](http://tesseract.projectnaptha.com)
 
-## korpora - OCR - Object Character Recognition
+## korpora - OCR - Optical Character Recognition
 
 Offline text recognition from any image. This web extension will enable context menu access to extract text from any image while browsing. Builds upon [Tesseract.js](https://github.com/naptha/tesseract.js)
 
@@ -8,7 +8,7 @@ Offline text recognition from any image. This web extension will enable context 
 
 ### Install
 
-- Addons Mozilla page (**link pending review**)
+- [Addons Mozilla page](https://addons.mozilla.org/en-GB/firefox/addon/korporize/)
 - Alternate for advanced users:
 
 **End Users Only**
