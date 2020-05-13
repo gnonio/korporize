@@ -16,7 +16,34 @@
    
 */
 
-let k_defaults, pageLanguage
+let pageLanguage
+
+let k_defaults = {}
+
+async function restoreOptions() {
+  let defaults = await browser.storage.local.get("k_defaults")
+  await loadOptions( defaults )
+}
+
+async function loadOptions(result) {
+  if ( result.k_defaults ) {      
+    k_defaults = result.k_defaults
+    console.log("Restoring defaults", k_defaults)
+  } else {
+    let options = {
+      k_defaults: {
+        language:   "eng",
+        autodetect: true,
+        quality:    "4.0.0_fast",
+        psm:        "AUTO", //AUTO | AUTO_OSD | SINGLE_BLOCK
+        autocopy:   true
+      }
+    }
+    await browser.storage.local.set(options)
+    k_defaults = options.k_defaults
+    console.warn("Setting defaults", k_defaults)
+  }
+}
 
 /*
   Helper - get image data
@@ -34,13 +61,13 @@ Object.defineProperty( HTMLImageElement.prototype,'toDataURL', {
 function getImageDataUrl(imgSrc) {
   let images = document.body.getElementsByTagName("img")
   let image
-  let paths = new URL(imgSrc).pathname.split("/")
-  paths = paths[paths.length-1]
   for ( img in images ) {
-    let i = images[img]
-    if (i.src && typeof i.src == "string") {
-      i = i.src
-      if ( i.indexOf(paths) >=0 ) image = images[img]
+    if ( images[img].src ) {
+      let hrefA = new URL(images[img].src).href
+      let hrefB = new URL(imgSrc).href
+      if ( hrefA == hrefB ) {
+        image = images[img]
+      }
     }
   }
   return image
@@ -53,9 +80,7 @@ async function handleMessage(message, sender, sendResponse) {
   let k_language = document.getElementById("k_language")
   let image, data, language
   
-  k_defaults = await browser.storage.local.get("k_defaults")
-  k_defaults = k_defaults.k_defaults
-  language = k_defaults.language
+
   
   switch (message.method) {
     /*
@@ -64,6 +89,8 @@ async function handleMessage(message, sender, sendResponse) {
     case "CP_extractTextLoadedImage":
       image = getImageDataUrl(message.data)
       if ( image ) {
+        await restoreOptions()  
+        language = k_defaults.language
         data = image.toDataURL()
         if ( k_defaults.autodetect ) {
           if ( !pageLanguage ) {
@@ -80,7 +107,7 @@ async function handleMessage(message, sender, sendResponse) {
         browser.runtime.sendMessage({method: "BG_extractTextLoadedImage",
           data: {image: data, alt: image.alt, title: image.title,
             width: image.naturalWidth, height: image.naturalHeight,
-            language: language, quality: k_defaults.quality }
+            language: language, quality: k_defaults.quality, psm: k_defaults.psm }
         })
       } else { console.warn("Image source URL not found in page") }
       break

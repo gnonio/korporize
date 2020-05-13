@@ -17,6 +17,7 @@
   text-align:center;
   vertical-align: middle;
   padding: 2px;
+  line-height: 28px;
 }
 .cell {
   display: table-cell;
@@ -25,6 +26,7 @@
 }
 .left { text-align: left }
 .right { text-align: right }
+.oblique { font-style: oblique }
 
 .w10 { width: 10% }
 .w20 { width: 20% }
@@ -42,26 +44,40 @@
   <body>
     <div class="table">
       <div class="row">
-        <div class="cell"><h4>Set default options:</h4></div>
+        <div class="cell"><h4>Set default options</h4></div>
       </div>
+    </div>
+    
+    <div class="table">
       <div class="row">
         <div class="cell w30 right">
-          <select id="languages" style="" title="Select Language"></select>
-        </div>
-        <div class="cell w60 left">
           <label for="languages">Language</label>
         </div>
+        <div class="cell w50 left">
+          <select id="languages" style="" title="Select Language"></select>
+        </div>
       </div>
       <div class="row">
         <div class="cell w30 right">
-          <input type="checkbox" id="autodetect" name="autodetect" value="autodetect" checked="checked">
-        </div>
-        <div class="cell w60 left" >
           <label for="autodetect">Automatic Detection</label>
         </div>
+        <div class="cell w50 left" >
+          <input type="checkbox" id="autodetect" name="autodetect" value="autodetect" checked="checked">
+        </div>
       </div>
-      <div class="row"> 
+      <div class="row">
+        <div class="cell w30 right">
+          <label for="autocopy">Automatic Copy to Clipboard</label>
+        </div>
+        <div class="cell w50 left">
+          <input type="checkbox" id="autocopy" name="autocopy" value="active" checked="checked">
+        </div>
+      </div>
+      <div class="row">
         <div id="quality" class="cell w30 right">
+          <label for="quality">Quality</label>
+        </div>
+        <div class="cell w50 left oblique">
           <input class="quality" type="radio" id="fast" name="quality" value="4.0.0_fast" checked="checked">
           <label for="fast">Fast</label>
           <input class="quality" type="radio" id="normal" name="quality" value="4.0.0">
@@ -69,24 +85,54 @@
           <input class="quality" type="radio" id="best" name="quality" value="4.0.0_best">
           <label for="best">Best</label>
         </div>
-        <div class="cell w60 left">
-          <label for="quality">Quality</label>
-        </div>
+      </div>      
+    </div>
+      
+    <div class="table">
+      <div class="row">
+        <label class="cell" for="psm">Page Segmentation Mode</label>
+        <!-- <div class="cell">Page Segmentation Mode</div> -->
       </div>
+    </div>
+    
+    <div class="table oblique">    
       <div class="row">
         <div class="cell w30 right">
-          <input type="checkbox" id="autocopy" name="autocopy" value="active" checked="checked">
+          <label for="psm_auto">Automatic</label>
         </div>
-        <div class="cell w60 left">
-          <label for="autocopy">Automatic Copy to Clipboard</label>
+        <div class="cell w50 left">
+          <input class="psm" type="radio" id="psm_auto" name="psm" value="AUTO" checked="checked">(segments image into blocks of text)
         </div>
       </div>
+      
       <div class="row">
-        <div class="cell w30">
+        <div class="cell w30 right">
+          <label for="psm_auto_osd">Automatic with Orientation</label>
+        </div>
+        <div class="cell w50 left">
+          <input class="psm" type="radio" id="psm_auto_osd" name="psm" value="AUTO_OSD">(also checks for orientation)
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="cell w30 right">
+          <label for="psm_single_block">Single Block</label>
+        </div>
+        <div class="cell w50 left">
+          <input class="psm" type="radio" id="psm_single_block" name="psm" value="SINGLE_BLOCK">(assumes one single block of text)
+        </div>
+      </div>
+    </div>
+      
+    <div class="table"> 
+      <div class="row">
+        <div class="cell w30"></div>
+        <div class="cell w50">
           <button id="k_save" title="Save Settings" width="80px">Save Settings</button>
         </div>
       </div>
     </div>
+    
     <div class="table">
       <div class="row"><div class="cell"><h4>Basic usage:</h4></div></div>
         <div class="row"><div class="cell">- Right click over an image in a web page</div></div>
@@ -95,11 +141,20 @@
         <div class="row"><div class="cell">- Wait for tesseract to work in the background</div></div>
         <div class="row"><div class="cell">- Obtain results in korporize panel</div></div>
         <div class="row"><div class="cell">- (Optional) copy results to clipboard</div></div>
+        
+      <div class="row"><div class="cell"><h4>To obtain good results:</h4></div></div>
+        <div class="row"><div class="cell">- make sure the automatic language detected is suitable for the characters in the image loaded</div></div>
+        <div class="row"><div class="cell">- force another language via Options page</div></div>
+        <div class="row"><div class="cell">- increase quality in Options page (try Normal or Best - both will take longer)</div></div>
+        <div class="row"><div class="cell">- make sure you have a suitable page segmentation for the image (will make this choice handier in future releases)</div></div>
+        <div class="row"><div class="cell">- choose a high resolution version of the image</div></div>
+        
       <div class="row"><div class="cell"><h4> Notes: </h4></div></div>
         <div class="row"><div class="cell">- Careful with the size of language dictionaries</div></div>
         <div class="row"><div class="cell">- Expect around 8Mb for Normal and 12Mb for Best Quality per language</div></div>
         <div class="row"><div class="cell">- Aside from above dictionaries no other data is ever stored by korporize</div></div>
     </div>
+    
     <script src="languages.js"></script>
     <script src="options.js"></script>
   </body>

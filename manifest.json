@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "korporize",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "OCR - Optical Character Recognition for any image you browse upon",
   "icons": {
     "32": "img/k.svg"

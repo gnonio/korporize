@@ -10,7 +10,7 @@ let k_defaults = {}
 async function restoreOptions() {
   let defaults = await browser.storage.local.get("k_defaults")
   loadOptions( defaults )
-  populate_langs()
+  populate_options()
 }
 
 async function loadOptions(result) {
@@ -23,6 +23,7 @@ async function loadOptions(result) {
         language:   "eng",
         autodetect: true,
         quality:    "4.0.0_fast",
+        psm:        "AUTO", //AUTO | AUTO_OSD | SINGLE_BLOCK
         autocopy:   true
       }
     }
@@ -30,8 +31,20 @@ async function loadOptions(result) {
     k_defaults = options.k_defaults
     console.warn("Setting defaults", k_defaults)
   }
+}
+
+function populate_options() {
+  for (let i = 0; i < tesseract_langs.name.length; i++) {
+    let lang = document.createElement("option")
+    lang.text = tesseract_langs.name[i] + " (" + tesseract_langs.code3[i] + ")"
+    lang.value = tesseract_langs.code3[i]
+    languages.add(lang)
+  }
   languages.selectedIndex = tesseract_langs.code3.indexOf(k_defaults.language)
+  
+  //languages.selectedIndex = tesseract_langs.code3.indexOf(k_defaults.language)
   autodetect.checked = k_defaults.autodetect
+  autocopy.checked = k_defaults.autocopy
   
   let quality = document.querySelectorAll(".quality")
   for ( input in quality ) {
@@ -42,17 +55,14 @@ async function loadOptions(result) {
     }
   }
   
-  autocopy.checked = k_defaults.autocopy
-}
-
-function populate_langs() {
-  for (let i = 0; i < tesseract_langs.name.length; i++) {
-    let lang = document.createElement("option")
-    lang.text = tesseract_langs.name[i] + " (" + tesseract_langs.code3[i] + ")"
-    lang.value = tesseract_langs.code3[i]
-    languages.add(lang)
+  let psm = document.querySelectorAll(".psm")
+  for ( input in psm ) {
+    if ( k_defaults.psm == psm[input].value ) {
+      psm[input].checked = true
+    } else {
+      psm[input].checked = false
+    }
   }
-  languages.selectedIndex = tesseract_langs.code3.indexOf(k_defaults.language)  
 }
 
 function languageChange() {
@@ -65,6 +75,10 @@ function autodetectChange() {
 
 function qualityChange() {
   k_defaults.quality = this.value
+}
+
+function psmChange() {
+  k_defaults.psm = this.value
 }
 
 function autocopyChange() {
@@ -85,6 +99,9 @@ languages.addEventListener("input", languageChange)
 let autodetect = document.getElementById("autodetect")
 autodetect.addEventListener("input", autodetectChange)
 
+let autocopy = document.getElementById("autocopy")
+autocopy.addEventListener("input", autocopyChange)
+
 let fast = document.getElementById("fast")
 fast.addEventListener("input", qualityChange)
 
@@ -94,8 +111,14 @@ normal.addEventListener("input", qualityChange)
 let best = document.getElementById("best")
 best.addEventListener("input", qualityChange)
 
-let autocopy = document.getElementById("autocopy")
-autocopy.addEventListener("input", autocopyChange)
+let psm_auto = document.getElementById("psm_auto")
+psm_auto.addEventListener("input", psmChange)
+
+let psm_auto_osd = document.getElementById("psm_auto_osd")
+psm_auto_osd.addEventListener("input", psmChange)
+
+let psm_single_block = document.getElementById("psm_single_block")
+psm_single_block.addEventListener("input", psmChange)
 
 let k_save = document.getElementById("k_save")
 k_save.addEventListener("click", saveOptions)

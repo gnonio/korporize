@@ -9,14 +9,11 @@ Offline text recognition from any image. This web extension will enable context 
 ### Install
 
 - [Addons Mozilla page](https://addons.mozilla.org/en-GB/firefox/addon/korporize/)
-- Alternate for advanced users:
 
-**End Users Only**
+#### Alternate install for advanced users
 
 - [download this repository](https://github.com/gnonio/korporize/archive/master.zip)
-- unzip to a suitable location in your hardrive
-
-Follow instructions for [Temporary installation in Firefox](./user-install.md)
+- follow instructions for [Temporary installation in Firefox](./user-install.md)
 
 ****
 
@@ -33,8 +30,11 @@ Follow instructions for [Temporary installation in Firefox](./user-install.md)
 
 To obtain good results:
 - make sure the automatic language detected is suitable for the characters in the image loaded
-force another language via Options page
-- increase quality in Options page (try Normal or Best - both will take longer)
+- force another language via Options page
+- increase quality in Options page
+(try Normal or Best - both will take longer)
+- make sure you have a suitable page segmentation for the image
+(will make this choice handier in future releases)
 - choose a high resolution version of the image
 
 ****
@@ -44,9 +44,15 @@ force another language via Options page
 - Extracts text from any image while browsing
 - Works offline (requires network only the first time a language is used to cache the dictionaries)
 - Automatic language detection (based on the visited web page)
-- Current implementation loads image already loaded at the visited page without downloading it twice
+- Prevents downloading twice already loaded images
 
 ****
+
+### Notes
+
+- Careful with the size of language dictionaries
+- Expect around 8Mb for Normal and 12Mb for Best Quality per language
+- Aside from above dictionaries no other data is ever stored by korporize
 
 ### Todo
 

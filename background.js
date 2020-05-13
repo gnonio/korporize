@@ -50,7 +50,7 @@ function handleMessage(message, sender, sendResponse) {
       CONTENT PAGE COMMUNICATION
     */
     case "BG_extractTextLoadedImage":
-      OCRLoadedImage( message.data.image, sender.tab.id, message.data.language, message.data.quality )
+      OCRLoadedImage( message.data.image, sender.tab.id, message.data.language, message.data.quality, message.data.psm )
       break
     case "BG_kOptions":
       browser.runtime.openOptionsPage()
@@ -63,10 +63,10 @@ function tesseractLogger(tabId, msg) {
   browser.tabs.sendMessage(tabId, {method: "CP_tesseractLogger", data: msg} )
 }
 
-function OCRLoadedImage(imageData, tabId, language, quality) {
+function OCRLoadedImage(imageData, tabId, language, quality, psm) {
   browser.tabs.sendMessage(tabId, {method: "CP_tesseractLanguage", data: language} )
   if ( imageData && tabId && language ) {
-    cron( extractTextImage, [imageData, language, quality, "SINGLE_BLOCK", tesseractLogger, tabId] )
+    cron( extractTextImage, [imageData, language, quality, psm, tesseractLogger, tabId] )
       .then( (resolve, reject) => {        
         if ( resolve ) {
           browser.tabs.sendMessage( tabId, {
