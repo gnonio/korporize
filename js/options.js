@@ -16,7 +16,7 @@ async function restoreOptions() {
 async function loadOptions(result) {
   if ( result.k_defaults ) {      
     k_defaults = result.k_defaults
-    console.log("Restoring defaults", k_defaults)
+    if ( DEBUG ) console.log("Restoring defaults", k_defaults)
   } else {
     let options = {
       k_defaults: {
@@ -42,7 +42,6 @@ function populate_options() {
   }
   languages.selectedIndex = tesseract_langs.code3.indexOf(k_defaults.language)
   
-  //languages.selectedIndex = tesseract_langs.code3.indexOf(k_defaults.language)
   autodetect.checked = k_defaults.autodetect
   autocopy.checked = k_defaults.autocopy
   
@@ -88,7 +87,7 @@ function autocopyChange() {
 function saveOptions(e) {
   e.preventDefault()
   browser.storage.local.set( {k_defaults: k_defaults} )
-  console.log("Saving defaults", k_defaults)
+  if ( DEBUG ) console.log("Saving defaults", k_defaults)
 }
   
 document.addEventListener("DOMContentLoaded", restoreOptions)

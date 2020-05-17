@@ -16,13 +16,22 @@ const tesseract_langs = {
     ["afr","sqi","amh","ara","asm","aze","aze_cyrl","eus","bel","ben","bos","bul","mya","cat","ceb","khm","chr","chi_sim","chi_tra","hrv","ces","dan","nld","dzo","eng","enm","epo","est","fin","fra","frm","glg","kat","kat_old","deu","frk","grc","ell","guj","hat","heb","hin","hun","isl","ind","iku","gle","ita","ita_old","jpn","jav","kan","kaz","kir","kor","kur","lao","lat","lav","lit","mkd","msa","mal","mlt","mar","nep","nor","ori","pan","fas","pol","por","pus","ron","rus","san","srp","srp_latn","sin","slk","slv","spa","spa_old","swa","swe","syr","tgl","tgk","tam","tel","tha","bod","tir","tur","uig","ukr","urd","uzb","uzb_cyrl","vie","cym","yid"]
 }
 
-const checkLanguage = (async () => {
+async function getPageLanguage() {
   // Compact Language Detector (CLD)
   // https://github.com/CLD2Owners/cld2
-  let lang = document.documentElement.lang.split(/-|_/)[0]
-  if ( lang.length > 0 ) {
-    return { isReliable: true, languages: [{ language: lang, percentage: 99}] }
+  let language
+  let htmlLang = document.documentElement.lang.split(/-|_/)[0]
+  if ( htmlLang.length > 0 ) {    
+    language = { isReliable: true, languages: [{ language: htmlLang, percentage: 99}] }
   } else {
-    return await browser.i18n.detectLanguage( document.documentElement.innerHTML )
+    language = await browser.i18n.detectLanguage( document.documentElement.innerHTML )
   }
-})
+  language = language.languages[0].language
+  language = ISO_langs.code3[ISO_langs.code2.indexOf( language )]
+  if ( language ) {
+    return language
+  } else {
+    console.warn("Language not detected, using default")
+    return null
+  }
+}

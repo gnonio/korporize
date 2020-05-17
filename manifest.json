@@ -26,18 +26,15 @@
   ],
   "background": {
     "scripts": [
+      "js/common.js",
       "background.js",
       "background-ui.js",
-      "lib/tesseract.min.js",
-      "js/helpers.js"
+      "lib/tesseract.min.js"
     ]
   },
   "web_accessible_resources": [
     "img/*.svg",
     "js/*.js",
-    "lib/*.js",
-    "lib/lang-data/4.0.0/*.traineddata.gz",
-    "lib/lang-data/4.0.0_best/*.traineddata.gz",
-    "lib/lang-data/4.0.0_fast/*.traineddata.gz"
+    "lib/*.js"
   ]
 }

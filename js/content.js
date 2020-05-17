@@ -16,120 +16,76 @@
    
 */
 
-let pageLanguage
-
-let k_defaults = {}
-
-async function restoreOptions() {
-  let defaults = await browser.storage.local.get("k_defaults")
-  await loadOptions( defaults )
-}
-
-async function loadOptions(result) {
-  if ( result.k_defaults ) {      
-    k_defaults = result.k_defaults
-    console.log("Restoring defaults", k_defaults)
-  } else {
-    let options = {
-      k_defaults: {
-        language:   "eng",
-        autodetect: true,
-        quality:    "4.0.0_fast",
-        psm:        "AUTO", //AUTO | AUTO_OSD | SINGLE_BLOCK
-        autocopy:   true
-      }
-    }
-    await browser.storage.local.set(options)
-    k_defaults = options.k_defaults
-    console.warn("Setting defaults", k_defaults)
-  }
-}
-
-/*
-  Helper - get image data
-  https://stackoverflow.com/questions/934012/get-image-data-url-in-javascript?noredirect=1&lq=1
-*/
-Object.defineProperty( HTMLImageElement.prototype,'toDataURL', {
-  enumerable:false, configurable:false, writable:false,
-  value: function(m,q) {
-    let c=document.createElement('canvas')
-    c.width=this.naturalWidth; c.height=this.naturalHeight
-    c.getContext('2d').drawImage(this,0,0); return c.toDataURL(m,q)
-  }
-})
-
-function getImageDataUrl(imgSrc) {
-  let images = document.body.getElementsByTagName("img")
-  let image
-  for ( img in images ) {
-    if ( images[img].src ) {
-      let hrefA = new URL(images[img].src).href
-      let hrefB = new URL(imgSrc).href
-      if ( hrefA == hrefB ) {
-        image = images[img]
-      }
-    }
-  }
-  return image
-}
+let pageLanguage, userLanguage
 
 async function handleMessage(message, sender, sendResponse) {
   let k_progress = document.getElementById("k_progress")
   let k_status = document.getElementById("k_status")
+  let k_time = document.getElementById("k_time")
   let k_OCRText = document.getElementById("k_OCRText")
   let k_language = document.getElementById("k_language")
   let image, data, language
   
-
+  // TODO: LOAD OPTIONS IN THE BACKGROUND
+  //await restoreOptions("CONTENT")
   
   switch (message.method) {
     /*
       BACKGROUND COMMUNICATION
     */
     case "CP_extractTextLoadedImage":
-      image = getImageDataUrl(message.data)
+      image = getImageElement(message.data)
       if ( image ) {
-        await restoreOptions()  
         language = k_defaults.language
         data = image.toDataURL()
+        let element = {
+          alt: image.alt,
+          title: image.title,
+          width: image.width,
+          height: image.height,
+          naturalWidth: image.naturalWidth,
+          naturalHeight: image.naturalHeight
+        }
         if ( k_defaults.autodetect ) {
           if ( !pageLanguage ) {
-            pageLanguage = await checkLanguage()
-            pageLanguage = pageLanguage.languages[0].language
-            pageLanguage = ISO_langs.code3[ISO_langs.code2.indexOf( pageLanguage )]
-            if ( pageLanguage ) {
-              language = pageLanguage
-            } else {
-              console.warn("Language not detected, using default: " + language)
-            }
+            pageLanguage = await getPageLanguage()
+            language = pageLanguage ? pageLanguage : language
+          } else {
+            language = pageLanguage
           }
-        }        
+        }
+        if ( userLanguage ) {
+          language = userLanguage
+        }
+        
+        // update language in CONTENT PAGE options selector
+        k_language.selectedIndex = tesseract_langs.code3.indexOf( language )
+        
         browser.runtime.sendMessage({method: "BG_extractTextLoadedImage",
-          data: {image: data, alt: image.alt, title: image.title,
-            width: image.naturalWidth, height: image.naturalHeight,
+          data: {image: data, element: element,
             language: language, quality: k_defaults.quality, psm: k_defaults.psm }
         })
-      } else { console.warn("Image source URL not found in page") }
-      break
-    case "CP_tesseractLanguage":
-      let showlanguage = ISO_langs.name[ISO_langs.code3.indexOf( message.data )]
-      k_language.innerText = showlanguage
-      break
-    case "CP_tesseractLogger":
-      if ( message.data.status == "recognizing text" ) {
-        k_status.innerText = "."
-      } else {
-        k_status.innerText = message.data.status        
       }
+      break
+    /*case "CP_tesseractLanguage":
+      let showlanguage = ISO_langs.name[ISO_langs.code3.indexOf( message.data )]
+      //k_language.innerText = showlanguage
+      break*/
+    case "CP_korporizeLogger":
+      //k_status.innerText = message.data.status
       let progress = Math.round(message.data.progress*100)
       k_progress.style.width = progress + "%"
       k_progress.innerText = progress + "%"
       break
     case "CP_showOCRResult":
       let result = message.data.result.data
-      k_OCRText.innerText = result.text
+      //k_OCRText.innerText = result.text
+      k_OCRText.innerHTML = result.hocr      
+      conformHOCR( result )
+      
       k_status.innerText = "Confidence: " + result.confidence + "%"
-      k_progress.innerText = "("+ message.data.time + " s) "
+      k_progress.innerText = ""
+      k_time.innerText = message.data.time + "s"
       if ( k_defaults.autocopy ) {
         navigator.clipboard.writeText( result.text )
       }
@@ -137,3 +93,69 @@ async function handleMessage(message, sender, sendResponse) {
   }
 }
 browser.runtime.onMessage.addListener( handleMessage )
+
+function conformHOCR( result ) {
+  let ocr = document.querySelector("#k_OCRText")
+  
+  let page = document.querySelector("#k_OCRText #page_1")
+  page.style.position = "relative"
+  page.contentEditable = "true"  
+  
+  let img = document.createElement("img")
+  img.src = result.image
+  img.width = result.element.width
+  img.height = result.element.height
+  img.style.position = "relative"
+  img.style.userSelect = "none"
+  img.style.opacity = "25%"
+  
+  // Prevent dragging image to interfere with contenteditable
+  img.ondragstart = function() { return false }
+  
+  let factor = result.element.width / result.element.naturalWidth
+  
+  page.insertBefore( img, page.childNodes[0] )
+  
+  let nodes = document.querySelectorAll("#k_OCRText span.ocrx_word")
+  for ( n in nodes ) {
+    let node = nodes[n]
+    if ( node.title ) {
+      let props = node.title.split("; ")
+      let attribs = {}
+      for ( p in props ) {
+        let prop = props[p].split(" ")
+        attribs[prop[0]] = prop.slice(1).map(function(v){return parseInt(v)})
+      }
+      
+      let left = attribs.bbox[0]
+      let top = attribs.bbox[1]
+      let width = attribs.bbox[2] - left
+      let height = attribs.bbox[3] - top
+      
+      let confidence = attribs.x_wconf[0] / 100
+      
+      let line = node.parentElement
+      let ltop = parseFloat( line.title.split("; ")[0].split(" ")[2] )
+      let lbottom = parseFloat( line.title.split("; ")[0].split(" ")[4] )
+      let lheight = parseFloat( line.title.split("; ")[2].split(" ")[1] )
+      
+      let baseline = parseFloat( line.title.split("; ")[1].split(" ")[2] )
+      
+      // aligns <span>s to image (border 1px)
+      /*let fromBottom = (lbottom - height) - (lheight - height) - (ltop - top)
+      node.style.top = fromBottom * factor + "px"
+      node.style.width = width * factor + "px"
+      node.style.height = height * factor + "px"*/
+      
+      node.style.position = "absolute"
+      node.style.left = left * factor + "px"
+      node.style.top = (ltop + baseline) * factor + "px"
+      //node.style.top = ( (ltop - lheight - baseline) ) * factor + "px"
+      node.style.fontSize = lheight * factor + "px"
+      node.style.color = "rgba(0,0,0," + confidence + ")"
+      node.style.backgroundColor = "rgba(255,0,0," + (1 - confidence) + ")"
+      
+      //node.style.letterSpacing = getNewLetterSpacing( node )
+    }
+  }  
+}
