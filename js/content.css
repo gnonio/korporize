@@ -13,6 +13,7 @@
   right: unset;
   bottom: unset;
   left: unset;
+  max-width: unset;
 }
 /* RESET */
 #korporize button {
@@ -21,9 +22,14 @@
 
 #korporize {
   position: fixed;
+  overflow: hidden;
   width: 40%;
+  min-width: 356px;
+  /*max-width: 80%;
+  max-height: 80%;*/
   top: 20px;
-  right: 20px;
+  /*right: 20px;*/
+  left: 50%;
   z-index: 10000;
   background: rgb(0, 224, 255, 255);
   border-radius: 8px;
@@ -49,13 +55,19 @@
   padding: 2px;
 }
 
+#k_OCR {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0px;
+}
+
 #k_OCRText {
   width: 100%;
   background: rgb(255, 255, 255, 255);
   text-align: left;
-  min-height: 60px;
   padding: 4px;
-  max-height: 400px;
+  /*min-height: 60px;
+  max-height: 400px;*/
   overflow: auto;
   cursor: text;
 }
@@ -82,6 +94,7 @@
 }
 .left { text-align: left }
 .right { text-align: right }
+.center { text-align: center }
 .oblique { font-style: oblique }
 
 .button {
@@ -99,23 +112,30 @@
 .kprogress {
   position: absolute;
   width: 100%;
-  background: rgba(0, 48, 64, 255);
   text-align: right;
+  background: rgba(0, 48, 64, 255);
   color: rgba(0, 192, 224, 255);
   border-radius: 4px;
-  line-height: 26px;
+  line-height: 16px;
+  font-size: 10px;
 }
 .kstatus {
   position: relative;
   width: 100%;
   text-align: center;
-  color: rgba(0, 192, 224, 255);
-  line-height: 26px;
+  color: rgba(0, 192, 224, 255);  
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ".";
+  line-height: 16px;
+  font-size: 10px;
+}
+.ktime {
+  font-size: 10px;
+  padding: 0px 6px;
 }
 
+.w5 { width: 5% }
 .w10 { width: 10% }
 .w20 { width: 20% }
 .w30 { width: 30% }
@@ -148,3 +168,12 @@
 .bgNormal { background: rgba(0, 108, 128, 255) }
 .bgNDark  { background: rgba(0, 48, 64, 255) }
 .bgDark   { background: rgba(0, 24, 32, 255) }
+
+.ocrx_word {
+  line-height: normal;
+  border-width: 1px;
+  border-color: rgba(255,0,0,0.2);
+  border-style: solid;
+  white-space: nowrap;
+  /*margin: -1px;*/
+}

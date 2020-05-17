@@ -1,0 +1,10 @@
+{
+  "name": "korporize",
+  "description": "OCR - Optical Character Recognition for any image you browse upon",
+  "repository": "https://github.com/gnonio/korporize",
+  "version": "0.9.21",
+  "license": "APACHE 2.0",
+  "dependencies": {
+    "tesseract.js": "^2.1.1"
+  }
+}

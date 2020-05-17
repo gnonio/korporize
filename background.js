@@ -28,6 +28,7 @@ async function notCPInject( tabID ) {
 
 async function injectCPScript(tabId){
   let urls = [
+    browser.runtime.getURL("js/common.js"),
     browser.runtime.getURL("js/languages.js"),
     browser.runtime.getURL("js/content.js"),
     browser.runtime.getURL("js/content-ui.js")
@@ -40,7 +41,7 @@ async function injectCPScript(tabId){
   }
   
   let script = scripts.join("\n\n")
-  var insertingCSS = browser.tabs.insertCSS( tabId, {file: "js/content.css"} )
+  var insertingCSS = browser.tabs.insertCSS( tabId, {file: "js/content.css?" + Date.now()} )
   return await browser.tabs.executeScript( tabId, {code: script} )
 }
 
@@ -50,7 +51,10 @@ function handleMessage(message, sender, sendResponse) {
       CONTENT PAGE COMMUNICATION
     */
     case "BG_extractTextLoadedImage":
-      OCRLoadedImage( message.data.image, sender.tab.id, message.data.language, message.data.quality, message.data.psm )
+      let config = message.data
+      config.tabId = sender.tab.id
+      config.logger = korporizeLogger
+      OCRLoadedImage( config )
       break
     case "BG_kOptions":
       browser.runtime.openOptionsPage()
@@ -59,78 +63,100 @@ function handleMessage(message, sender, sendResponse) {
 }
 browser.runtime.onMessage.addListener( handleMessage )
 
-function tesseractLogger(tabId, msg) {
-  browser.tabs.sendMessage(tabId, {method: "CP_tesseractLogger", data: msg} )
+function korporizeLogger(tabId, msg) {
+  browser.tabs.sendMessage(tabId, {method: "CP_korporizeLogger", data: msg} )
 }
 
-function OCRLoadedImage(imageData, tabId, language, quality, psm) {
-  browser.tabs.sendMessage(tabId, {method: "CP_tesseractLanguage", data: language} )
-  if ( imageData && tabId && language ) {
-    cron( extractTextImage, [imageData, language, quality, psm, tesseractLogger, tabId] )
+function OCRLoadedImage(config) {
+  //browser.tabs.sendMessage(tabId, {method: "CP_tesseractLanguage", data: language} )
+  if ( config.tabId && config.image && config.language ) {
+    cron( extractTextImage, [ config ] )
       .then( (resolve, reject) => {        
         if ( resolve ) {
-          browser.tabs.sendMessage( tabId, {
+          browser.tabs.sendMessage( config.tabId, {
             method: "CP_showOCRResult", data: resolve } )
         } else {
-          browser.tabs.sendMessage( tabId, {
+          browser.tabs.sendMessage( config.tabId, {
             method: "CP_showOCRResult", data: reject } )
         }
       } )
   } else {
-    console.warn("OCRLoadedImage", imageData, tabId, language)
+    console.warn("OCRLoadedImage", config)
   }
 }
 
-async function extractTextImage( imageUrl, language, quality, psm, logger, tabId ) {
+//async function extractTextImage( imageUrl, language, quality, psm, logger, tabId, element ) {
+async function extractTextImage( config ) {
+  /*config.image,
+    config.language,
+    config.quality,
+    config.psm,
+    config.logger,
+    config.tabId,
+    config.element*/
+    
   //https://github.com/naptha/tesseract.js/blob/master/docs/api.md
   const createWorker = Tesseract.createWorker
   
   //https://github.com/naptha/tessdata
-  let lang = language ? language : 'eng'
+  let language = config.language ? config.language : 'eng'
   // 'lib/lang-data/' | 'https://tessdata.projectnaptha.com/'
   //let datapath = 'lib/lang-data/'
   let datapath = 'https://tessdata.projectnaptha.com/'
   // 4.0.0 | 4.0.0_best | 4.0.0_fast
-  let traindata = quality ? quality : "4.0.0_fast"
+  let traindata = config.quality ? config.quality : "4.0.0_fast"
   // write | readOnly | refresh | none
   let cachedata = 'write'
-  //AUTO | AUTO_OSD | SINGLE_BLOCK
-  let PSM = psm ? Tesseract.PSM[psm] : Tesseract.PSM.SINGLE_BLOCK
-  
-  console.log(datapath + traindata + '/' + lang + '.traineddata.gz')
-  console.log(psm,PSM)
+  // OEM_TESSERACT_ONLY | OEM_LSTM_ONLY | OEM_DEFAULT
+  //let OEM = oem ? Tesseract.PSM[oem] : Tesseract.OSM.OEM_DEFAULT
+  // AUTO | AUTO_OSD | SINGLE_BLOCK
+  let PSM = config.psm ? Tesseract.PSM[config.psm] : Tesseract.PSM.SINGLE_BLOCK
   
   let options = {
     workerPath: 'lib/worker.min.js',
-    corePath: 'lib/tesseract-core.wasm.js', // .asm.js = SLOW
+    corePath: 'lib/tesseract-core.wasm.js', // .asm.js = SLOWER
     langPath: datapath + traindata,
     cachePath: traindata,
     cacheMethod: cachedata,
+    // CRITICAL (Content Security Policy): workerBlobURL must be set to false
+    // The page's settings blocked the loading of a resource at blob:moz-extension:// .../... ("script-src").
+    // Check: spawnWorker.js
+    // https://github.com/naptha/tesseract.js/issues/219
+    //  > https://github.com/naptha/tesseract.js/pull/322
     workerBlobURL: false,
-    logger: m => logger(tabId, m), // Add logger here
-    errorHandler: e => logger(tabId, e)
+    logger: m => config.logger( config.tabId, m ), // Add logger here
+    errorHandler: e => config.logger( config.tabId, e )
   }
   let parameters = {
-    tessedit_pageseg_mode: PSM,
-    tessedit_create_box: '1',
-    tessedit_create_unlv: '1',
-    tessedit_create_osd: '1',
+    //tessedit_ocr_engine_mode:   OEM,
+    tessedit_pageseg_mode:      PSM,
+    /*tessedit_char_whitelist:    '',
+    preserve_interword_spaces:  '0',
+    user_defined_dpi:           '',
+    tessedit_create_hocr:       '1',
+    tessedit_create_tsv:        '1',
+    tessedit_create_box:        '0',
+    tessedit_create_unlv:       '0',
+    tessedit_create_osd:        '0',*/
   }
-  let worker = createWorker(options)
+  if ( DEBUG ) console.log( language, options, parameters )
   
-  let data
+  let worker = createWorker( options )
+  
+  let result
   try {  
     await worker.load()
-    await worker.loadLanguage(lang)
-    await worker.initialize(lang)
-    await worker.setParameters(parameters)
-    //let { data: { text } } = await worker.recognize(imageUrl)
-    data = await worker.recognize(imageUrl) // , hocr, tsv, box, unlv
-    data.data.language = language
+    await worker.loadLanguage( language )
+    await worker.initialize( language )
+    await worker.setParameters( parameters )
+    result = await worker.recognize( config.image )
+    result.data.image = config.image
+    result.data.element = config.element
+    result.data.language = config.language
     await worker.terminate()
   } catch (e) {
     console.warn(e)
-    data = {data: { language: language, text: "Error", confidence: 0 }}
+    result = {data: { language: language, text: "Error", confidence: 0 }}
   }
-  return data
+  return result
 }

@@ -4,10 +4,19 @@
 <div id="korporize">
 
   <div class="kheader table" title="Press and Drag">
-    <div class="kgrabber cell w70 left">
+    <div class="kgrabber cell w50 left">
       <img id="k_logo" class="h32" src="../img/korporize.svg"/>
     </div>
-    <div class="cell w30 right">
+    <div class="cell w30">
+      <div class="bgDark h16" style="position: relative; border-radius: 4px;">
+        <div id="k_progress" class="kprogress h16" title="Progress">0%</div>
+        <div id="k_status" class="kstatus h16" title="Status" style="font-style:oblique;">...</div>
+      </div>
+    </div>
+    <div class="cell w10 left">
+      <div id="k_time" class="ktime" title="Processing Time">0.0s</div>
+    </div>
+    <div class="cell w10 right">
       <!-- <button class="button" title="korporize Menu"> -->
         <!-- <img id="korporize_menu" src="../img/Menu.svg"/> -->
       <!-- </button> -->
@@ -22,27 +31,21 @@
     <div id="k_OCRPanel" style="padding:2px 8px;">
       
       <div class="table" style="padding: 2px 8px;">
-        <!-- <div class="cell w10 right"> -->
-          <!-- <button id="k_refresh" class="button h28" title="Refresh" style=""> -->
-            <!-- <img class="h12" src="../img/refresh.svg"/> -->
-          <!-- </button> -->
-        <!-- </div> -->
         <div class="cell w30 left">
-          <div id="k_language" title="Detected Language" style="font-style:oblique;"></div>
-        </div>
-        <div class="cell w60 left bgDark" style="position: relative; border-radius: 4px;">
-          <div id="k_progress" class="kprogress" title="Progress">0%</div>
-          <div id="k_status" class="kstatus" title="Status" style="font-style:oblique;">kstatus</div>
+          <select id="k_language" title="Select Language"></select>
         </div>
         <div class="cell w10 right">
-          <button id="k_copy" class="button h28"  title="Copy to Clipboard" style="">
+          <!-- <button id="k_retry" class="button h28" title="Retry"> -->
+            <!-- <img class="h12" src="../img/refresh.svg"/> -->
+          <!-- </button> -->
+          <button id="k_copy" class="button h28"  title="Copy to Clipboard">
             <img class="h12" src="../img/copy.svg"/>
           </button>
         </div>
       </div>
       
-      <div class="table" style="padding:8px;">
-        <div id="k_OCRText" style="" contenteditable="true">...</div>
+      <div id="k_OCR" style="padding:8px;">
+        <div id="k_OCRText" style="">...</div> <!-- contenteditable="true" -->
       </div>
 
     </div>

@@ -54,11 +54,11 @@ To obtain good results:
 - Expect around 8Mb for Normal and 12Mb for Best Quality per language
 - Aside from above dictionaries no other data is ever stored by korporize
 
+****
+
 ### Todo
 
 - Many other options for accessing Tesseract functionality (image from link, PDF load and save, etc...)
 - Preloading of language dictionaries (via Options page)
 - Provide some cache management options
 - Provide access as an API for other webextensions
-
-****

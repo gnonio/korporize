@@ -3,57 +3,82 @@
    Copyright 2020 Pedro SOARES
    
 */
-// HELPERS
-String.prototype.toDOM = function(){
-  let d = document
-  let a = d.createElement("div")
-  let b = d.createDocumentFragment()
-  a.innerHTML = this
-  let i
-  while(i=a.firstChild)b.appendChild(i)
-  return b
+
+function clickAndDrag(element, grabber) {
+  var X = 0, Y = 0, dX = 0, dY = 0
+  if (grabber) {
+    grabber.onmousedown = dragMouseDown
+  } else {
+    element.onmousedown = dragMouseDown
+  }
+  function dragMouseDown(e) {
+    e = e || window.event
+    e.preventDefault()
+    dX = e.clientX
+    dY = e.clientY
+    grabber.style.cursor = "grabbing"
+    document.onmouseup = closeDragElement
+    document.onmousemove = elementDrag
+  }
+  function elementDrag(e) {
+    e = e || window.event
+    e.preventDefault()
+    e.stopPropagation()
+    X = dX - e.clientX
+    Y = dY - e.clientY
+    dX = e.clientX
+    dY = e.clientY
+    element.style.top = (element.offsetTop - Y) + "px"
+    element.style.left = (element.offsetLeft - X) + "px"
+  }
+  function closeDragElement() {
+    grabber.style.cursor = "grab"
+    document.onmouseup = null
+    document.onmousemove = null
+  }
 }
 
-// We may need this async because of checkLanguage()
-async function init(){  
-  function pressAndDrag(element, grabber) {
-    var X = 0, Y = 0, dX = 0, dY = 0
-    if (grabber) {
-      grabber.onmousedown = dragMouseDown
-    } else {
-      element.onmousedown = dragMouseDown
-    }
-    function dragMouseDown(e) {
-      e = e || window.event
-      e.preventDefault()
-      dX = e.clientX
-      dY = e.clientY
-      grabber.style.cursor = "grabbing"
-      document.onmouseup = closeDragElement
-      document.onmousemove = elementDrag
-    }
-    function elementDrag(e) {
-      e = e || window.event
-      e.preventDefault()
-      e.stopPropagation()
-      X = dX - e.clientX
-      Y = dY - e.clientY
-      dX = e.clientX
-      dY = e.clientY
-      element.style.top = (element.offsetTop - Y) + "px"
-      element.style.left = (element.offsetLeft - X) + "px"
-    }
-    function closeDragElement() {
-      grabber.style.cursor = "grab"
-      document.onmouseup = null
-      document.onmousemove = null
-    }
+function k_retryOptions() {
+  if ( DEBUG ) console.log("k_retryOptions", k_defaults)
+}
+
+function k_copytoclipboard() {
+  let OCRtext = document.getElementById("k_OCRText").innerText
+  navigator.clipboard.writeText( OCRtext )
+}
+
+// OPTIONS
+let k_defaults = {}
+
+async function restoreOptions() {
+  if ( !k_defaults.language ) {
+    let defaults = await browser.storage.local.get("k_defaults")
+    await loadOptions( defaults )
   }
-  
-  function k_copytoclipboard() {
-    let OCRtext = document.getElementById("k_OCRText").innerText
-    navigator.clipboard.writeText( OCRtext )
+}
+
+async function loadOptions(result) {
+  if ( result.k_defaults ) {      
+    k_defaults = result.k_defaults
+    if ( DEBUG ) console.log("Restoring defaults", k_defaults)
+  } else {
+    let options = {
+      k_defaults: {
+        language:   "eng",
+        autodetect: true,
+        quality:    "4.0.0_fast",
+        psm:        "AUTO", //AUTO | AUTO_OSD | SINGLE_BLOCK
+        autocopy:   true
+      }
+    }
+    await browser.storage.local.set(options)
+    k_defaults = options.k_defaults
+    console.warn("Setting defaults", k_defaults)
   }
+}
+
+async function init(){
+  await restoreOptions()
   
   function k_OCRPanel_toggle() {
     if (k_OCRPanel.style.display === 'none') {
@@ -65,13 +90,28 @@ async function init(){
     }
   }
   
+  function populate_languages() {
+    for (let i = 0; i < tesseract_langs.name.length; i++) {
+      let lang = document.createElement("option")
+      lang.text = tesseract_langs.name[i] + " (" + tesseract_langs.code3[i] + ")"
+      lang.value = tesseract_langs.code3[i]
+      k_language.add(lang)
+    }
+    k_language.selectedIndex = tesseract_langs.code3.indexOf(k_defaults.language)
+  }
+  
+  function languageChange() {
+    //k_defaults.language = this.options[this.selectedIndex].value
+    userLanguage = this.options[this.selectedIndex].value
+  }
+  
   // Load HTML
   let htmlUrl = browser.runtime.getURL("js/content.html")
   let urlFetch = await fetch( htmlUrl )
   let korpusOCR_html = await urlFetch.text()
   korpusOCR_html = korpusOCR_html.replace(/\.\.\//g, new URL( htmlUrl ).origin + "/" )
 
-  document.body.appendChild(korpusOCR_html.toDOM())
+  document.body.appendChild( korpusOCR_html.toDOM() )
   
   // Actions
   // We must call browser.runtime.openOptionsPage() from Background script
@@ -81,7 +121,14 @@ async function init(){
   
   let korporize = document.getElementById("korporize")
   let kgrabber = document.querySelector("#korporize .kgrabber")
-  pressAndDrag(korporize, kgrabber)
+  clickAndDrag(korporize, kgrabber)
+  
+  let k_language = document.getElementById("k_language")
+  k_language.addEventListener("input", languageChange)
+  populate_languages()
+  
+  /*let k_retry = document.getElementById("k_retry")
+  k_retry.addEventListener("click", k_retryOptions)*/
   
   let k_copy = document.getElementById("k_copy")
   k_copy.addEventListener("click", k_copytoclipboard)
@@ -89,28 +136,6 @@ async function init(){
   let k_OCRPanel = document.getElementById("k_OCRPanel")
   let k_drawer = document.getElementById("k_drawer")
   k_drawer.addEventListener("click", k_OCRPanel_toggle)
-  
-  /*let korporize_lang
-  async function populate_langs() {
-    if ( !korporizeLanguage ) {
-      korporizeLanguage = await checkLanguage()
-      detectedLanguage = korporizeLanguage.languages[0].language
-      detectedLanguage = ISO_langs.le3[ISO_langs.le2.indexOf( detectedLanguage )]
-    }
-    for (let i = 0; i < tesseract_langs.name.length; i++) {
-      let lang = document.createElement("option")
-      lang.text = "(" + tesseract_langs.le[i] + ") " + tesseract_langs.name[i]
-      lang.value = tesseract_langs.le[i]
-      korporize_langs.add(lang)
-    }
-    //let le3 = ISO_langs.le3[ISO_langs.le2.indexOf( korporizeLanguage )] 
-    korporize_langs.selectedIndex = tesseract_langs.le.indexOf(detectedLanguage)
-  }
-  
-  function korporize_lang_switch() {
-    korporize_lang = korporize_langs.options[korporize_langs.selectedIndex].value;
-    console.log( korporize_lang )
-  }*/
 
 }
 init()
