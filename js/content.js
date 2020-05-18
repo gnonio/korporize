@@ -62,7 +62,7 @@ async function handleMessage(message, sender, sendResponse) {
         k_language.selectedIndex = tesseract_langs.code3.indexOf( language )
         
         browser.runtime.sendMessage({method: "BG_extractTextLoadedImage",
-          data: {image: data, element: element,
+          data: { image: data, element: element,
             language: language, quality: k_defaults.quality, psm: k_defaults.psm }
         })
       }
@@ -80,7 +80,7 @@ async function handleMessage(message, sender, sendResponse) {
     case "CP_showOCRResult":
       let result = message.data.result.data
       //k_OCRText.innerText = result.text
-      k_OCRText.innerHTML = result.hocr      
+      k_OCRText.innerHTML = result.hocr
       conformHOCR( result )
       
       k_status.innerText = "Confidence: " + result.confidence + "%"
@@ -94,12 +94,10 @@ async function handleMessage(message, sender, sendResponse) {
 }
 browser.runtime.onMessage.addListener( handleMessage )
 
-function conformHOCR( result ) {
-  let ocr = document.querySelector("#k_OCRText")
-  
-  let page = document.querySelector("#k_OCRText #page_1")
-  page.style.position = "relative"
-  page.contentEditable = "true"  
+function conformHOCR( result ) {  
+  let ocrPage = document.querySelector("#k_OCRText #page_1")
+  ocrPage.style.position = "relative"
+  ocrPage.contentEditable = "true"
   
   let img = document.createElement("img")
   img.src = result.image
@@ -114,13 +112,13 @@ function conformHOCR( result ) {
   
   let factor = result.element.width / result.element.naturalWidth
   
-  page.insertBefore( img, page.childNodes[0] )
+  ocrPage.insertBefore( img, ocrPage.childNodes[0] )
   
-  let nodes = document.querySelectorAll("#k_OCRText span.ocrx_word")
-  for ( n in nodes ) {
-    let node = nodes[n]
-    if ( node.title ) {
-      let props = node.title.split("; ")
+  let words = document.querySelectorAll("#k_OCRText span.ocrx_word")
+  for ( w in words ) {
+    let word = words[w]
+    if ( word.title ) {
+      let props = word.title.split("; ")
       let attribs = {}
       for ( p in props ) {
         let prop = props[p].split(" ")
@@ -134,7 +132,7 @@ function conformHOCR( result ) {
       
       let confidence = attribs.x_wconf[0] / 100
       
-      let line = node.parentElement
+      let line = word.parentElement
       let ltop = parseFloat( line.title.split("; ")[0].split(" ")[2] )
       let lbottom = parseFloat( line.title.split("; ")[0].split(" ")[4] )
       let lheight = parseFloat( line.title.split("; ")[2].split(" ")[1] )
@@ -143,19 +141,20 @@ function conformHOCR( result ) {
       
       // aligns <span>s to image (border 1px)
       /*let fromBottom = (lbottom - height) - (lheight - height) - (ltop - top)
-      node.style.top = fromBottom * factor + "px"
-      node.style.width = width * factor + "px"
-      node.style.height = height * factor + "px"*/
+      word.style.top = fromBottom * factor + "px"
+      word.style.width = width * factor + "px"
+      word.style.height = height * factor + "px"*/
       
-      node.style.position = "absolute"
-      node.style.left = left * factor + "px"
-      node.style.top = (ltop + baseline) * factor + "px"
-      //node.style.top = ( (ltop - lheight - baseline) ) * factor + "px"
-      node.style.fontSize = lheight * factor + "px"
-      node.style.color = "rgba(0,0,0," + confidence + ")"
-      node.style.backgroundColor = "rgba(255,0,0," + (1 - confidence) + ")"
+      word.style.position = "absolute"
+      word.style.left = left * factor + "px"
+      word.style.top = (ltop + baseline) * factor + "px"
+      //word.style.top = ( (ltop - lheight - baseline) ) * factor + "px"
+      word.style.fontSize = lheight * factor + "px"
+      word.style.color = "rgba(0,0,0," + confidence + ")"
+      word.style.backgroundColor = "rgba(255,0,0," + (1 - confidence) + ")"
       
-      //node.style.letterSpacing = getNewLetterSpacing( node )
+      //word.style.letterSpacing = getNewLetterSpacing( word )
     }
   }  
 }
+"content.js"
