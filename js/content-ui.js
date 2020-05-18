@@ -47,36 +47,6 @@ function k_copytoclipboard() {
   navigator.clipboard.writeText( OCRtext )
 }
 
-// OPTIONS
-let k_defaults = {}
-
-async function restoreOptions() {
-  if ( !k_defaults.language ) {
-    let defaults = await browser.storage.local.get("k_defaults")
-    await loadOptions( defaults )
-  }
-}
-
-async function loadOptions(result) {
-  if ( result.k_defaults ) {      
-    k_defaults = result.k_defaults
-    if ( DEBUG ) console.log("Restoring defaults", k_defaults)
-  } else {
-    let options = {
-      k_defaults: {
-        language:   "eng",
-        autodetect: true,
-        quality:    "4.0.0_fast",
-        psm:        "AUTO", //AUTO | AUTO_OSD | SINGLE_BLOCK
-        autocopy:   true
-      }
-    }
-    await browser.storage.local.set(options)
-    k_defaults = options.k_defaults
-    console.warn("Setting defaults", k_defaults)
-  }
-}
-
 async function init(){
   await restoreOptions()
   
@@ -139,6 +109,3 @@ async function init(){
 
 }
 init()
-
-
-
