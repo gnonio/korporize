@@ -3,35 +3,7 @@
    Copyright 2020 Pedro SOARES
    
 */
-//var clearing = browser.storage.local.clear() // sync.clear()
 
-let k_defaults = {}
-
-async function restoreOptions() {
-  let defaults = await browser.storage.local.get("k_defaults")
-  loadOptions( defaults )
-  populate_options()
-}
-
-async function loadOptions(result) {
-  if ( result.k_defaults ) {      
-    k_defaults = result.k_defaults
-    if ( DEBUG ) console.log("Restoring defaults", k_defaults)
-  } else {
-    let options = {
-      k_defaults: {
-        language:   "eng",
-        autodetect: true,
-        quality:    "4.0.0_fast",
-        psm:        "AUTO", //AUTO | AUTO_OSD | SINGLE_BLOCK
-        autocopy:   true
-      }
-    }
-    await browser.storage.local.set(options)
-    k_defaults = options.k_defaults
-    console.warn("Setting defaults", k_defaults)
-  }
-}
 
 function populate_options() {
   for (let i = 0; i < tesseract_langs.name.length; i++) {
@@ -89,8 +61,13 @@ function saveOptions(e) {
   browser.storage.local.set( {k_defaults: k_defaults} )
   if ( DEBUG ) console.log("Saving defaults", k_defaults)
 }
+
+async function init() {
+  await restoreOptions()
+  populate_options()
+}
   
-document.addEventListener("DOMContentLoaded", restoreOptions)
+document.addEventListener("DOMContentLoaded", init)
 
 let languages = document.getElementById("languages")
 languages.addEventListener("input", languageChange)

@@ -24,13 +24,13 @@ browser.contextMenus.onClicked.addListener( async function(info, tab) {
   if ( await notCPInject( tab.id ) ) {
     await injectCPScript( tab.id )
   }
-  switch (info.menuItemId) {
+  switch ( info.menuItemId ) {
     /*
       CONTENT PAGE COMMUNICATION
     */
     case "extractTextLoadedImage":
-      browser.tabs.sendMessage(tab.id, {
-        method: "CP_extractTextLoadedImage", data: info.srcUrl})
+      browser.tabs.sendMessage( tab.id, {
+        method: "CP_extractTextLoadedImage", data: info.srcUrl} )
       break
     /*
       OTHER COMMUNICATION
