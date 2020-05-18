@@ -26,23 +26,19 @@ async function notCPInject( tabID ) {
   return true
 }
 
-async function injectCPScript(tabId){
-  let urls = [
-    browser.runtime.getURL("js/common.js"),
-    browser.runtime.getURL("js/languages.js"),
-    browser.runtime.getURL("js/content.js"),
-    browser.runtime.getURL("js/content-ui.js")
-  ]
-  let scripts = []
+async function injectCPScript( tabId ) {
+  let insertingCSS = browser.tabs.insertCSS( tabId, {file: "/js/content.css?" + Date.now()} )
   
-  for ( url in urls ) {
-    let urlFetch = await fetch( urls[url] )
-    scripts.push( await urlFetch.text() )
-  }
-  
-  let script = scripts.join("\n\n")
-  var insertingCSS = browser.tabs.insertCSS( tabId, {file: "js/content.css?" + Date.now()} )
-  return await browser.tabs.executeScript( tabId, {code: script} )
+  // CRITICAL:  https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/executeScript#Return_value
+  // ALL scripts but the last require some return value as a workaround: ie. <string> "name.js"
+  // last script is executing an async with return value itself
+  // we would be splitting execution... or smtg (this is uncomfortable)
+  let executingScript
+  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/utils.js"} )
+  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/common.js"} )
+  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/languages.js"} )
+  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/content.js"} )
+  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/content-ui.js"} )
 }
 
 function handleMessage(message, sender, sendResponse) {
@@ -85,15 +81,10 @@ function OCRLoadedImage(config) {
   }
 }
 
-//async function extractTextImage( imageUrl, language, quality, psm, logger, tabId, element ) {
 async function extractTextImage( config ) {
-  /*config.image,
-    config.language,
-    config.quality,
-    config.psm,
-    config.logger,
-    config.tabId,
-    config.element*/
+  /*config.tabId, config.logger,
+    config.element, config.image,
+    config.language, config.quality, config.psm*/
     
   //https://github.com/naptha/tesseract.js/blob/master/docs/api.md
   const createWorker = Tesseract.createWorker
