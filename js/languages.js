@@ -35,3 +35,4 @@ async function getPageLanguage() {
     return null
   }
 }
+"languages.js"
