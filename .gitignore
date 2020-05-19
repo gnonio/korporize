@@ -1,0 +1,8 @@
+
+EXCLUDE/lang-data/4.0.0_fast/osd.traineddata.gz
+EXCLUDE/lang-data/4.0.0_fast/eng.traineddata.gz
+EXCLUDE/lang-data/4.0.0_best/osd.traineddata.gz
+EXCLUDE/lang-data/4.0.0_best/eng.traineddata.gz
+EXCLUDE/lang-data/4.0.0/osd.traineddata.gz
+EXCLUDE/lang-data/4.0.0/equ.traineddata.gz
+EXCLUDE/lang-data/4.0.0/eng.traineddata.gz
