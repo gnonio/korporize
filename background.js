@@ -16,12 +16,17 @@
    
 */
 
-async function notCPInject( tabID ) {
-  try {
-    await browser.tabs.sendMessage(tabID, {})
-    return false
-  } catch (e) {
-    console.warn(e)
+let injected = {}
+
+function getInjected() {
+  return injected
+}
+
+function needsInject( tabId, pageUrl ) {
+  if ( getInjected()[tabId] ) {
+    let inject = pageUrl != getInjected()[tabId]
+    getInjected()[tabId] = pageUrl
+    return inject
   }
   return true
 }
@@ -115,7 +120,7 @@ async function extractTextImage( config ) {
     // https://github.com/naptha/tesseract.js/issues/219
     //  > https://github.com/naptha/tesseract.js/pull/322
     workerBlobURL: false,
-    logger: m => config.logger( config.tabId, m ), // Add logger here
+    logger: m => config.logger( config.tabId, m ),
     errorHandler: e => config.logger( config.tabId, e )
   }
   let parameters = {

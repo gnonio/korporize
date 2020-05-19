@@ -20,9 +20,10 @@ browser.contextMenus.create({
   contexts: ["page"]
 })*/
 
-browser.contextMenus.onClicked.addListener( async function(info, tab) {
-  if ( await notCPInject( tab.id ) ) {
+async function handleUI(info, tab) {
+  if ( needsInject( tab.id, info.pageUrl ) ) {
     await injectCPScript( tab.id )
+    getInjected()[tab.id] = info.pageUrl
   }
   switch ( info.menuItemId ) {
     /*
@@ -42,4 +43,6 @@ browser.contextMenus.onClicked.addListener( async function(info, tab) {
       console.log( "extractTextPage", info, tab )
       break*/
   }
-})
+}
+
+browser.contextMenus.onClicked.addListener( handleUI )
