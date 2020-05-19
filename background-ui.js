@@ -21,10 +21,9 @@ browser.contextMenus.create({
 })*/
 
 async function handleUI(info, tab) {
-  if ( needsInject( tab.id, info.pageUrl ) ) {
+  if ( await needsInject( tab.id, info.pageUrl ) ) {
     await injectCPScript( tab.id )
-    getInjected()[tab.id] = info.pageUrl
-  }
+  }  
   switch ( info.menuItemId ) {
     /*
       CONTENT PAGE COMMUNICATION

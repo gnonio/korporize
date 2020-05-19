@@ -16,19 +16,27 @@
    
 */
 
-let injected = {}
+let injected = {} // we must keep track of script injections
 
-function getInjected() {
+function getInjected() { // and access it with a getter from an async
   return injected
 }
 
-function needsInject( tabId, pageUrl ) {
-  if ( getInjected()[tabId] ) {
-    let inject = pageUrl != getInjected()[tabId]
-    getInjected()[tabId] = pageUrl
+async function needsInject( tabId, pageUrl ) {
+  try { // If messaging successful don't inject
+    await browser.tabs.sendMessage(tabID, {})
+    return false
+  } catch (e) {
+    console.warn(e)
+    let inject = true // otherwise we'll inject
+    if ( getInjected()[tabId] ) { // but only if we haven't before, user may have navigated back
+      inject = getInjected()[tabId].indexOf(pageUrl) < 0 ? true : false
+      if ( inject ) getInjected()[tabId].push( pageUrl )
+    } else {
+      getInjected()[tabId] = [pageUrl]
+    }
     return inject
   }
-  return true
 }
 
 async function injectCPScript( tabId ) {
