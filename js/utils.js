@@ -5,7 +5,7 @@
 */
 
 // UTILS
-let DEBUG = true
+const DEBUG = true
 /*let origConsole = {}
 origConsole.log = console.log
 //orgConsole.trace = console.trace

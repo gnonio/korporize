@@ -1,0 +1,1 @@
+const INJECTED = true
