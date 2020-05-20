@@ -20,7 +20,7 @@ async function conditionalCPInject( tabId ) {
   // we are injecting to content page only at user demand
   // but given the possibility that the user navigates away and back to an already injected page
   // and the difficulty in determining injected scripts state and availability from background page
-  // we rely on the failure to inject with a dummy script to proceed or not wit hour code injection
+  // we rely on the failure to inject with a dummy script to proceed or not with our code injection
   // (not erring out is the condition itself to proceed)
   let injectGuard = await browser.tabs.executeScript( tabId, {file: "/js/injected.js"} )
     .then( async function() {
