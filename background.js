@@ -16,29 +16,29 @@
    
 */
 
-async function notCPInject( tabID ) {
-  try {
-    await browser.tabs.sendMessage(tabID, {})
-    return false
-  } catch (e) {
-    console.warn(e)
-  }
-  return true
-}
-
-async function injectCPScript( tabId ) {
-  let insertingCSS = browser.tabs.insertCSS( tabId, {file: "/js/content.css?" + Date.now()} )
-  
-  // CRITICAL:  https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/executeScript#Return_value
-  // ALL scripts but the last require some return value as a workaround: ie. <string> "name.js"
-  // last script is executing an async with return value itself
-  // we would be splitting execution... or smtg (this is uncomfortable)
-  let executingScript
-  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/utils.js"} )
-  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/common.js"} )
-  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/languages.js"} )
-  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/content.js"} )
-  executingScript = await browser.tabs.executeScript( tabId, {file: "/js/content-ui.js"} )
+async function conditionalCPInject( tabId ) {
+  // we are injecting to content page only at user demand
+  // but given the possibility that the user navigates away and back to an already injected page
+  // and the difficulty in determining injected scripts state and availability from background page
+  // we rely on the failure to inject with a dummy script to proceed or not wit hour code injection
+  // (not erring out is the condition itself to proceed)
+  let injectGuard = await browser.tabs.executeScript( tabId, {file: "/js/injected.js"} )
+    .then( async function() {
+      let insertingCSS = await browser.tabs.insertCSS( tabId, {file: "/js/content.css?" + Date.now()} )
+      
+      // CRITICAL:  https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/executeScript#Return_value
+      // ALL scripts but the last require some return value as a workaround: ie. <string> "name.js"
+      // last script is executing an async with return value itself
+      // we would be splitting execution... or smtg (this is uncomfortable)
+      let executingScript
+      executingScript = await browser.tabs.executeScript( tabId, {file: "/js/utils.js"} )
+      executingScript = await browser.tabs.executeScript( tabId, {file: "/js/common.js"} )
+      executingScript = await browser.tabs.executeScript( tabId, {file: "/js/languages.js"} )
+      executingScript = await browser.tabs.executeScript( tabId, {file: "/js/content.js"} )
+      executingScript = await browser.tabs.executeScript( tabId, {file: "/js/content-ui.js"} )
+    })/*.catch( function(error) {
+      console.log("Inject error", error)
+    })*/
 }
 
 function handleMessage(message, sender, sendResponse) {
@@ -115,7 +115,7 @@ async function extractTextImage( config ) {
     // https://github.com/naptha/tesseract.js/issues/219
     //  > https://github.com/naptha/tesseract.js/pull/322
     workerBlobURL: false,
-    logger: m => config.logger( config.tabId, m ), // Add logger here
+    logger: m => config.logger( config.tabId, m ),
     errorHandler: e => config.logger( config.tabId, e )
   }
   let parameters = {

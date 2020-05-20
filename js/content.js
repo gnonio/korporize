@@ -61,7 +61,7 @@ async function handleMessage(message, sender, sendResponse) {
         // update language in CONTENT PAGE options selector
         k_language.selectedIndex = tesseract_langs.code3.indexOf( language )
         
-        browser.runtime.sendMessage({method: "BG_extractTextLoadedImage",
+        return browser.runtime.sendMessage({method: "BG_extractTextLoadedImage",
           data: { image: data, element: element,
             language: language, quality: k_defaults.quality, psm: k_defaults.psm }
         })
